@@ -7,8 +7,8 @@
 
 ## 🚀 Live Demo
 
-🔗 **[chronopilot-xxxx-as.a.run.app](https://chronopilot-xxxx-as.a.run.app)**  
-📊 **[/status](https://chronopilot-xxxx-as.a.run.app/status)** — Live system health check
+🔗 **[chronopilot-754173513004.asia-south1.run.app](https://chronopilot-754173513004.asia-south1.run.app/)**  
+📊 **[/status](https://chronopilot-754173513004.asia-south1.run.app/status)** — Live system health check
 
 ---
 
@@ -53,7 +53,7 @@ User (Browser)
       │ HTTPS
       ▼
 FastAPI on Cloud Run  ←──────────────────────────────┐
-      │                                               │
+      │                                              │
       │ Private IP (easy-alloydb-vpc)      Gemini 3 Flash Preview
       ▼                                    (Google AI Studio API)
 AlloyDB for PostgreSQL                              │
@@ -111,7 +111,7 @@ AlloyDB for PostgreSQL                              │
 ### Setup
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/chronopilot.git
+git clone https://github.com/ArrushTandon/chronopilot.git
 cd chronopilot
 
 python3 -m venv venv && source venv/bin/activate
