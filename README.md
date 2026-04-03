@@ -127,7 +127,7 @@ GEMINI_API_KEY=your_google_ai_studio_api_key
 DB_HOST=your_alloydb_public_ip
 DB_PORT=5432
 DB_NAME=deadline_survival
-DB_USER=postgres
+DB_USER=your_username
 DB_PASS=your_password
 ```
 
@@ -151,7 +151,7 @@ gcloud beta run deploy chronopilot \
   --subnet=easy-alloydb-subnet \
   --allow-unauthenticated \
   --vpc-egress=all-traffic \
-  --set-env-vars GEMINI_API_KEY=YOUR_KEY,DB_HOST=YOUR_PRIVATE_IP,DB_PORT=5432,DB_NAME=deadline_survival,DB_USER=postgres,DB_PASS=alloydb
+  --set-env-vars GEMINI_API_KEY=YOUR_KEY,DB_HOST=YOUR_PRIVATE_IP,DB_PORT=5432,DB_NAME=deadline_survival,DB_USER=your_username,DB_PASS=your_password
 ```
 
 ---
@@ -204,7 +204,7 @@ chronopilot/
 
 ## 👤 Author
 
-**Arrush** — Final Year B.Tech Computer Science, SRMIST (NIRF Engineering Rank #14)  
+**Arrush Tandon** — Final Year B.Tech Computer Science, SRMIST 
 Built for the **Gen AI Academy APAC Edition Hackathon**
 
 ---
