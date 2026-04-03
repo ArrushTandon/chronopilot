@@ -205,7 +205,10 @@ chronopilot/
 ## 👤 Author
 
 **Arrush Tandon** — Final Year B.Tech Computer Science, SRMIST 
-Built for the **Gen AI Academy APAC Edition Hackathon**
+
+---
+
+Built for the **Gen AI Academy APAC Edition Hackathon Cohort 1**
 
 ---
 
