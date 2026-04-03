@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChronoPilot</title>
+<link rel="icon" type="image/png" href="/static/Logo.png">
+<link rel="apple-touch-icon" href="/static/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* From the logo — blue glitter + dusty rose + warm brown */
+    --blue:        #4a7fa8;
+    --blue-light:  #7aaecb;
+    --blue-soft:   #ddeaf3;
+    --rose:        #c9a49a;
+    --rose-light:  #e8cfc9;
+    --rose-soft:   #f5ebe8;
+    --brown:       #7a5c4a;
+    --brown-dark:  #4e3828;
+    --brown-light: #c4a898;
+
+    /* Paper tones */
+    --paper:       #faf7f3;
+    --paper2:      #f3ede5;
+    --paper3:      #ebe2d6;
+    --paper4:      #ddd3c4;
+
+    /* Text */
+    --ink:         #2e1f14;
+    --ink-mid:     #6b4f3a;
+    --ink-faint:   #a8907c;
+
+    --border:      #d5c8b8;
+    --shadow:      rgba(78, 56, 40, 0.10);
+
+    --font-serif:  'Lora', Georgia, serif;
+    --font-sans:   'DM Sans', system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    /* Subtle paper grain via SVG data URI */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  /* ── TORN PAPER DECORATION ─────────────────────── */
+  .torn-top {
+    width: 100%;
+    height: 18px;
+    background: var(--paper3);
+    clip-path: polygon(
+      0% 100%, 1% 30%, 2.5% 80%, 4% 20%, 6% 70%, 8% 10%,
+      10% 60%, 12% 25%, 14% 75%, 16% 15%, 18% 65%, 20% 30%,
+      22% 80%, 24% 20%, 26% 70%, 28% 10%, 30% 55%, 32% 25%,
+      34% 75%, 36% 15%, 38% 60%, 40% 30%, 42% 80%, 44% 20%,
+      46% 65%, 48% 10%, 50% 55%, 52% 25%, 54% 70%, 56% 15%,
+      58% 60%, 60% 30%, 62% 75%, 64% 20%, 66% 65%, 68% 10%,
+      70% 55%, 72% 25%, 74% 70%, 76% 15%, 78% 60%, 80% 30%,
+      82% 80%, 84% 20%, 86% 65%, 88% 10%, 90% 55%, 92% 30%,
+      94% 75%, 96% 20%, 98% 65%, 100% 10%, 100% 100%
+    );
+    margin-bottom: -2px;
+  }
+
+  /* ── LOGIN ──────────────────────────────────────── */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+  }
+
+  /* Decorative torn paper scraps behind login */
+  #loginScreen::before {
+    content: '';
+    position: fixed;
+    top: -40px; left: -60px;
+    width: 340px; height: 340px;
+    background: var(--blue-soft);
+    border-radius: 30% 70% 60% 40% / 50% 40% 60% 50%;
+    opacity: 0.5;
+    pointer-events: none;
+    transform: rotate(-12deg);
+  }
+
+  #loginScreen::after {
+    content: '';
+    position: fixed;
+    bottom: -60px; right: -40px;
+    width: 280px; height: 280px;
+    background: var(--rose-light);
+    border-radius: 60% 40% 30% 70% / 40% 60% 40% 60%;
+    opacity: 0.45;
+    pointer-events: none;
+    transform: rotate(8deg);
+  }
+
+  .login-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 50px 46px;
+    max-width: 430px;
+    width: 100%;
+    box-shadow:
+      0 6px 40px var(--shadow),
+      0 1px 0 rgba(255,255,255,0.9) inset;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Torn edge on login card top */
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg,
+      var(--blue) 0%, var(--blue) 30%,
+      var(--rose) 30%, var(--rose) 60%,
+      var(--brown-light) 60%, var(--brown-light) 100%
+    );
+    border-radius: 24px 24px 0 0;
+    opacity: 0.6;
+  }
+
+  .brand-lockup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+
+  .logo-img {
+    width: 52px; height: 52px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(74,127,168,0.3));
+  }
+
+  .brand-text {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--brown-dark);
+    letter-spacing: -0.5px;
+  }
+
+  .brand-text span { color: var(--blue); }
+
+  .login-card h2 {
+    font-family: var(--font-serif);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .login-card > p {
+    color: var(--ink-mid);
+    font-size: 14px;
+    line-height: 1.65;
+    margin-bottom: 32px;
+  }
+
+  .field-wrap { display: flex; flex-direction: column; gap: 14px; margin-bottom: 22px; text-align: left; }
+
+  .field-wrap label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 5px;
+  }
+
+  .field-wrap input {
+    width: 100%;
+    padding: 12px 15px;
+    background: var(--paper2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .field-wrap input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(74,127,168,0.12);
+    background: white;
+  }
+
+  .field-wrap input::placeholder { color: var(--ink-faint); }
+
+  .login-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--brown-dark);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.2px;
+    box-shadow: 0 3px 10px rgba(78,56,40,0.3);
+  }
+
+  .login-btn:hover { background: var(--brown); transform: translateY(-1px); box-shadow: 0 5px 16px rgba(78,56,40,0.35); }
+  .login-btn:disabled { background: var(--ink-faint); cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .login-note { margin-top: 14px; font-size: 12px; color: var(--ink-faint); }
+
+  /* ── TOPBAR ─────────────────────────────────────── */
+  #appScreen { display: none; }
+
+  .topbar {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-brand { display: flex; align-items: center; gap: 11px; }
+
+  .topbar-logo {
+    width: 36px; height: 36px;
+    object-fit: contain;
+  }
+
+  .topbar-name {
+    font-family: var(--font-serif);
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--brown-dark);
+  }
+
+  .topbar-name span { color: var(--blue); }
+
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+
+  .status-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: #edf6f0;
+    border: 1px solid #b8dfc7;
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    color: #3d7a55;
+    font-weight: 500;
+  }
+
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #3d7a55;
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+  .user-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--paper2);
+    border: 1px solid var(--border);
+    padding: 5px 13px 5px 8px;
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--ink-mid);
+  }
+
+  .user-avatar {
+    width: 26px; height: 26px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-light));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: white;
+    font-weight: 700;
+  }
+
+  /* ── BLUE ACCENT STRIP ──────────────────────────── */
+  .accent-strip {
+    height: 4px;
+    background: linear-gradient(90deg,
+      var(--blue) 0%,
+      var(--blue-light) 40%,
+      var(--rose) 70%,
+      var(--brown-light) 100%
+    );
+    opacity: 0.7;
+  }
+
+  /* ── LAYOUT ─────────────────────────────────────── */
+  .app-body {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+    display: grid;
+    grid-template-columns: 1fr 314px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+
+  /* ── CHAT ───────────────────────────────────────── */
+  .chat-wrap { display: flex; flex-direction: column; gap: 10px; }
+
+  .chat-box {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 548px;
+    box-shadow: 0 3px 20px var(--shadow);
+  }
+
+  .chat-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--paper2);
+  }
+
+  .pilot-avatar {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-light));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(74,127,168,0.3);
+    overflow: hidden;
+  }
+
+  .pilot-avatar img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    padding: 4px;
+  }
+
+  .pilot-info h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    font-family: var(--font-serif);
+  }
+
+  .pilot-info p { font-size: 11px; color: var(--ink-faint); margin-top: 1px; }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 18px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    scroll-behavior: smooth;
+    background: var(--paper);
+  }
+
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--paper4); border-radius: 2px; }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    animation: pop 0.22s ease-out;
+  }
+
+  @keyframes pop { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
+
+  .msg.user { align-items: flex-end; }
+  .msg.ai   { align-items: flex-start; }
+
+  .msg-bubble {
+    max-width: 80%;
+    padding: 11px 15px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .msg.user .msg-bubble {
+    background: var(--blue);
+    color: white;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 8px rgba(74,127,168,0.25);
+  }
+
+  .msg.ai .msg-bubble {
+    background: white;
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 5px var(--shadow);
+  }
+
+  .msg-time { font-size: 10px; color: var(--ink-faint); }
+
+  .typing-indicator {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    padding: 11px 15px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+    box-shadow: 0 1px 5px var(--shadow);
+  }
+
+  .typing-indicator.active { display: flex; }
+
+  .typing-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--ink-faint);
+    animation: tdot 1.2s ease-in-out infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes tdot { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+  .chat-input-row {
+    padding: 13px 15px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    background: white;
+  }
+
+  .chat-input {
+    flex: 1;
+    background: var(--paper2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 14px;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    min-height: 42px;
+    max-height: 110px;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+
+  .chat-input:focus {
+    border-color: var(--blue);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(74,127,168,0.1);
+  }
+
+  .chat-input::placeholder { color: var(--ink-faint); }
+
+  .send-btn {
+    background: var(--blue);
+    border: none;
+    border-radius: 10px;
+    width: 42px; height: 42px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 17px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(74,127,168,0.3);
+  }
+
+  .send-btn:hover { background: var(--blue-light); transform: translateY(-1px); }
+  .send-btn:disabled { background: var(--paper4); color: var(--ink-faint); cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .quick-prompts { display: flex; gap: 7px; flex-wrap: wrap; }
+
+  .qp-btn {
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--ink-mid);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 13px;
+    border-radius: 100px;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: all 0.18s;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+
+  .qp-btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+    background: var(--blue-soft);
+  }
+
+  /* ── RIGHT PANEL ────────────────────────────────── */
+  .right-panel { display: flex; flex-direction: column; gap: 14px; }
+
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 17px 18px;
+    box-shadow: 0 2px 12px var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Decorative torn corner on cards */
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 28px; height: 28px;
+    background: var(--paper2);
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
+    border-left: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 13px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--paper3);
+  }
+
+  /* ── AGENT ROWS ─────────────────────────────────── */
+  .agent-list { display: flex; flex-direction: column; gap: 7px; }
+
+  .agent-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: all 0.28s ease;
+  }
+
+  .agent-row.idle     { background: var(--paper2); opacity: 0.6; }
+  .agent-row.active   { background: var(--blue-soft); border-color: rgba(74,127,168,0.3); opacity: 1; }
+  .agent-row.done     { background: #edf6f0; border-color: rgba(61,122,85,0.25); opacity: 1; }
+
+  .agent-icon {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .agent-icon.planner   { background: rgba(74,127,168,0.12); }
+  .agent-icon.priority  { background: rgba(201,164,154,0.25); }
+  .agent-icon.scheduler { background: rgba(122,92,74,0.12); }
+  .agent-icon.executor  { background: rgba(61,122,85,0.12); }
+  .agent-icon.memory    { background: rgba(78,56,40,0.1); }
+
+  .agent-meta { flex: 1; }
+  .agent-name { font-size: 12px; font-weight: 600; color: var(--ink); }
+  .agent-sub  { font-size: 10px; color: var(--ink-faint); margin-top: 1px; }
+
+  .agent-badge {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    padding: 3px 7px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .badge-idle   { background: var(--paper3); color: var(--ink-faint); }
+  .badge-active { background: var(--blue-soft); color: var(--blue); animation: blink 1s infinite; }
+  .badge-done   { background: #ddf0e6; color: #3d7a55; }
+
+  /* ── TASKS ──────────────────────────────────────── */
+  .task-list {
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 230px; overflow-y: auto;
+  }
+
+  .task-list::-webkit-scrollbar { width: 3px; }
+  .task-list::-webkit-scrollbar-thumb { background: var(--paper4); }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 9px 11px;
+    background: var(--paper2);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    animation: pop 0.22s ease-out;
+  }
+
+  .task-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .dot-high   { background: var(--rose); box-shadow: 0 0 0 2px var(--rose-light); }
+  .dot-medium { background: #c9a830; box-shadow: 0 0 0 2px #f0e4a8; }
+  .dot-low    { background: #5a9e72; box-shadow: 0 0 0 2px #bfe0cc; }
+
+  .task-text { flex: 1; font-size: 12px; line-height: 1.45; color: var(--ink); }
+
+  .task-tag {
+    font-size: 9px; font-weight: 600;
+    padding: 2px 7px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+
+  .tag-high   { background: var(--rose-soft); color: var(--brown); }
+  .tag-medium { background: #fef8e0; color: #8a6800; }
+  .tag-low    { background: #e8f5ee; color: #3d7a55; }
+
+  /* ── LOG ────────────────────────────────────────── */
+  .log-area {
+    max-height: 160px; overflow-y: auto;
+    display: flex; flex-direction: column;
+  }
+
+  .log-area::-webkit-scrollbar { width: 3px; }
+  .log-area::-webkit-scrollbar-thumb { background: var(--paper4); }
+
+  .log-line {
+    display: flex; gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--paper3);
+    font-size: 11px;
+    animation: pop 0.2s ease-out;
+  }
+
+  .log-line:last-child { border-bottom: none; }
+  .log-agent  { font-weight: 600; color: var(--blue); white-space: nowrap; flex-shrink: 0; }
+  .log-action { color: var(--ink-mid); }
+
+  .empty-hint {
+    font-size: 12px; color: var(--ink-faint);
+    text-align: center; padding: 14px 0;
+    font-style: italic;
+    font-family: var(--font-serif);
+  }
+
+  @media (max-width: 760px) {
+    .app-body { grid-template-columns: 1fr; }
+    .right-panel { order: -1; }
+    .chat-box { height: 420px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="brand-lockup">
+      <img src="/static/Logo.png" alt="ChronoPilot" class="logo-img" onerror="this.style.display='none'">
+      <div class="brand-text">Chrono<span>Pilot</span></div>
+    </div>
+    <h2>Welcome aboard</h2>
+    <p>Your AI co-pilot for deadlines, schedules, and getting things done. Tell us who you are to get started.</p>
+    <div class="field-wrap">
+      <div>
+        <label>Your Name</label>
+        <input type="text" id="loginName" placeholder="e.g. Arrush" autocomplete="name" />
+      </div>
+      <div>
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" placeholder="e.g. arrush@example.com" autocomplete="email" />
+      </div>
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="handleLogin()">Let's go →</button>
+    <div class="login-note">No password needed. We'll remember you on this device.</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <img src="/static/Logo.png" alt="cp" class="topbar-logo" onerror="this.style.display='none'">
+      <div class="topbar-name">Chrono<span>Pilot</span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        Co-Pilot Ready
+      </div>
+      <div class="user-chip">
+        <div class="user-avatar" id="userInitial">A</div>
+        <span id="userNameDisplay">User</span>
+      </div>
+    </div>
+  </div>
+  <div class="accent-strip"></div>
+
+  <div class="app-body">
+
+    <!-- CHAT -->
+    <div class="chat-wrap">
+      <div class="section-label">Conversation</div>
+      <div class="chat-box">
+        <div class="chat-header">
+          <div class="pilot-avatar">
+            <img src="/static/Logo.png" alt="cp" onerror="this.outerHTML='<div class=\'pilot-avatar\' style=\'background:linear-gradient(135deg,var(--blue),var(--blue-light));border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:16px;\'>🧭</div>'">
+          </div>
+          <div class="pilot-info">
+            <h3>ChronoPilot</h3>
+            <p>Your personal AI productivity co-pilot</p>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="msg ai">
+            <div class="msg-bubble" id="welcomeMsg">
+              Hello! I'm ChronoPilot. Tell me what's on your plate and I'll help you take control of it — or we can just chat.
+            </div>
+            <span class="msg-time" id="welcomeTime"></span>
+          </div>
+          <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+
+        <div class="chat-input-row">
+          <textarea class="chat-input" id="chatInput" placeholder="Type anything — deadlines, questions, or just say hi..." rows="1"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">↑</button>
+        </div>
+      </div>
+
+      <div class="quick-prompts">
+        <button class="qp-btn" onclick="insertPrompt('I have 3 deadlines this week and haven\'t started any')">🔥 Deadline crisis</button>
+        <button class="qp-btn" onclick="insertPrompt('Help me plan my day tomorrow')">📅 Plan my day</button>
+        <button class="qp-btn" onclick="insertPrompt('What should I work on first right now?')">🎯 What first?</button>
+        <button class="qp-btn" onclick="insertPrompt('I\'m pulling an all-nighter, help me plan the next 8 hours')">🌙 All-nighter</button>
+        <button class="qp-btn" onclick="insertPrompt('How does ChronoPilot work?')">💬 How does this work?</button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+
+      <div class="card">
+        <div class="card-title">What's happening</div>
+        <div class="agent-list">
+          <div class="agent-row idle" id="agent-planner">
+            <div class="agent-icon planner">🧠</div>
+            <div class="agent-meta">
+              <div class="agent-name">Planning</div>
+              <div class="agent-sub" id="sub-planner">Breaks your goals into tasks</div>
+            </div>
+            <span class="agent-badge badge-idle" id="badge-planner">Idle</span>
+          </div>
+          <div class="agent-row idle" id="agent-priority">
+            <div class="agent-icon priority">🎯</div>
+            <div class="agent-meta">
+              <div class="agent-name">Prioritising</div>
+              <div class="agent-sub" id="sub-priority">Ranks tasks by urgency</div>
+            </div>
+            <span class="agent-badge badge-idle" id="badge-priority">Idle</span>
+          </div>
+          <div class="agent-row idle" id="agent-scheduler">
+            <div class="agent-icon scheduler">📅</div>
+            <div class="agent-meta">
+              <div class="agent-name">Scheduling</div>
+              <div class="agent-sub" id="sub-scheduler">Builds your time blocks</div>
+            </div>
+            <span class="agent-badge badge-idle" id="badge-scheduler">Idle</span>
+          </div>
+          <div class="agent-row idle" id="agent-executor">
+            <div class="agent-icon executor">✅</div>
+            <div class="agent-meta">
+              <div class="agent-name">Saving</div>
+              <div class="agent-sub" id="sub-executor">Stores tasks and plans</div>
+            </div>
+            <span class="agent-badge badge-idle" id="badge-executor">Idle</span>
+          </div>
+          <div class="agent-row idle" id="agent-memory">
+            <div class="agent-icon memory">💡</div>
+            <div class="agent-meta">
+              <div class="agent-name">Learning</div>
+              <div class="agent-sub" id="sub-memory">Remembers your patterns</div>
+            </div>
+            <span class="agent-badge badge-idle" id="badge-memory">Idle</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">What I've Learned About You</div>
+        <div id="memoryPanel" style="display:flex;flex-direction:column;gap:8px;">
+          <div class="empty-hint">Updates after each session.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Your Tasks</div>
+        <div class="task-list" id="taskList">
+          <div class="empty-hint">Tasks will appear once you share your goals.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Activity</div>
+        <div class="log-area" id="actionLog">
+          <div class="empty-hint">Actions will stream here during planning.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = "";
+  let USER_ID = null, USER_NAME = "", conversationHistory = [], isLoading = false;
+
+  function getTime() {
+    return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ── AUTH ─────────────────────────────────────────
+  async function handleLogin() {
+    const name  = document.getElementById('loginName').value.trim();
+    const email = document.getElementById('loginEmail').value.trim();
+    if (!name || !email || !email.includes('@')) { alert('Please enter a valid name and email.'); return; }
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true; btn.textContent = 'Getting ready...';
+    try {
+      const res = await fetch(`${API_BASE}/user/login`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email })
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      USER_ID = data.user_id; USER_NAME = data.name;
+      localStorage.setItem('cp_user_id', USER_ID);
+      localStorage.setItem('cp_user_name', USER_NAME);
+      showApp(data.name, data.returning);
+      if (data.returning) fetchMemoryProfile();
+    } catch {
+      btn.disabled = false; btn.textContent = "Let's go →";
+      alert('Could not connect. Please try again.');
+    }
+  }
+
+  function showApp(name, returning) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display   = 'block';
+    document.getElementById('userNameDisplay').textContent = name;
+    document.getElementById('userInitial').textContent    = name.charAt(0).toUpperCase();
+    document.getElementById('welcomeTime').textContent    = getTime();
+    document.getElementById('welcomeMsg').textContent = returning
+      ? `Welcome back, ${name}! I remember your patterns from last time. What are we tackling today?`
+      : `Hello ${name}! I'm ChronoPilot — your AI productivity co-pilot. Tell me what's overwhelming you, and I'll break it down, prioritise it, and build you a plan. Or we can just talk things through.`;
+  }
+
+  window.addEventListener('load', () => {
+    const id = localStorage.getItem('cp_user_id'), nm = localStorage.getItem('cp_user_name');
+    if (id && nm) { USER_ID = id; USER_NAME = nm; showApp(nm, true); }
+    document.getElementById('welcomeTime').textContent = getTime();
+  });
+
+  // ── CHAT ─────────────────────────────────────────
+  function addMessage(text, role) {
+    const container = document.getElementById('chatMessages');
+    const typing    = document.getElementById('typingIndicator');
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    div.innerHTML = `<div class="msg-bubble">${formatted}</div><span class="msg-time">${getTime()}</span>`;
+    container.insertBefore(div, typing);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function addLog(text) {
+    const log = document.getElementById('actionLog');
+    const empty = log.querySelector('.empty-hint');
+    if (empty) empty.remove();
+    const parts = text.split('→');
+    const line  = document.createElement('div');
+    line.className = 'log-line';
+    line.innerHTML = `<span class="log-agent">${parts[0].trim()}</span><span class="log-action">${parts.length > 1 ? '→ ' + parts.slice(1).join('→').trim() : ''}</span>`;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function renderTasks(tasks) {
+    const list = document.getElementById('taskList');
+    if (!tasks || !tasks.length) return;
+    list.innerHTML = '';
+    tasks.forEach(t => {
+      const p = t.priority_label || 'medium';
+      const el = document.createElement('div');
+      el.className = 'task-item';
+      el.innerHTML = `<div class="task-dot dot-${p}"></div><div class="task-text">${t.title}</div><span class="task-tag tag-${p}">${p}</span>`;
+      list.appendChild(el);
+    });
+  }
+
+  function setAgentState(name, state, sub) {
+    const row = document.getElementById(`agent-${name}`);
+    const badge = document.getElementById(`badge-${name}`);
+    const subEl = document.getElementById(`sub-${name}`);
+    if (!row) return;
+    row.className     = `agent-row ${state}`;
+    badge.className   = `agent-badge badge-${state}`;
+    badge.textContent = { idle: 'Idle', active: 'Working', done: 'Done' }[state] || state;
+    if (sub) subEl.textContent = sub;
+  }
+
+  function resetAgents() {
+    ['planner','priority','scheduler','executor','memory'].forEach(a => setAgentState(a, 'idle', null));
+  }
+
+  async function sendMessage() {
+    if (isLoading) return;
+    const input = document.getElementById('chatInput');
+    const msg   = input.value.trim();
+    if (!msg) return;
+    addMessage(msg, 'user');
+    input.value = ''; input.style.height = 'auto';
+    conversationHistory.push({ role: 'user', content: msg });
+    isLoading = true;
+    document.getElementById('sendBtn').disabled = true;
+    document.getElementById('typingIndicator').classList.add('active');
+    document.getElementById('chatMessages').scrollTop = 99999;
+    resetAgents();
+
+    try {
+      const res = await fetch(`${API_BASE}/orchestrate`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: USER_ID, message: msg, conversation_history: conversationHistory })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.detail || 'Error'); }
+      const data    = await res.json();
+      const logs    = data.execution_log || [];
+      const invoked = data.agents_invoked || [];
+
+      invoked.forEach(a => { if (document.getElementById(`agent-${a}`)) setAgentState(a, 'active', 'Working...'); });
+
+      logs.forEach((log, i) => {
+        setTimeout(() => {
+          addLog(log);
+          const l = log.toLowerCase();
+          if (l.includes('planner') && l.includes('decomposed')) setAgentState('planner',   'done', 'Tasks decomposed');
+          if (l.includes('priority') && l.includes('ranked'))    setAgentState('priority',  'done', 'Tasks ranked');
+          if (l.includes('scheduler'))                            setAgentState('scheduler', 'done', 'Schedule built');
+          if (l.includes('executor') && l.includes('saving'))    setAgentState('executor',  'done', 'Tasks saved');
+          if (l.includes('memory') && l.includes('updated'))     setAgentState('memory',    'done', 'Profile updated');
+        }, i * 175);
+      });
+
+      setTimeout(() => {
+        document.getElementById('typingIndicator').classList.remove('active');
+        addMessage(data.reply, 'ai');
+        renderTasks(data.tasks_created || []);
+        conversationHistory.push({ role: 'assistant', content: data.reply });
+        fetchMemoryProfile();
+      }, logs.length * 175 + 240);
+
+    } catch (err) {
+      document.getElementById('typingIndicator').classList.remove('active');
+      addMessage(`Sorry — ${err.message}. Please try again in a moment.`, 'ai');
+      resetAgents();
+    } finally {
+      isLoading = false;
+      document.getElementById('sendBtn').disabled = false;
+    }
+  }
+
+  async function fetchMemoryProfile() {
+  try {
+    const res = await fetch(`${API_BASE}/memory/${USER_ID}`);
+    const data = await res.json();
+    renderMemory(data);
+  } catch {}
+}
+
+function renderMemory(data) {
+  const panel = document.getElementById('memoryPanel');
+  if (!panel || !data || data.total_sessions === 0) return;
+  panel.innerHTML = `
+    <div class="task-item">
+      <div class="task-dot dot-medium"></div>
+      <div class="task-text">Sessions with ChronoPilot</div>
+      <span class="task-tag tag-medium">${data.total_sessions}</span>
+    </div>
+    <div class="task-item">
+      <div class="task-dot dot-high"></div>
+      <div class="task-text">Your productive hours</div>
+      <span class="task-tag tag-high">${data.productive_hours_start}:00 – ${data.productive_hours_end}:00</span>
+    </div>
+    <div class="task-item">
+      <div class="task-dot dot-low"></div>
+      <div class="task-text">Task completion rate</div>
+      <span class="task-tag tag-low">${Math.round((data.completion_rate || 1) * 100)}%</span>
+    </div>
+  `;
+}
+
+  function insertPrompt(t) { if (!isLoading) { document.getElementById('chatInput').value = t; sendMessage(); } }
+
+  document.getElementById('chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  document.getElementById('chatInput').addEventListener('input', function () {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 110) + 'px';
+  });
+  document.getElementById('loginEmail').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
+  });
+</script>
+</body>
+</html>

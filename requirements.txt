@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+pg8000
+google-genai
+pydantic
+python-dotenv
