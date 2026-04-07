@@ -36,6 +36,46 @@ def fetch_user_memory(user_id: str) -> dict:
     finally:
         conn.close()
 
+def parse_deadline(deadline_str) -> str | None:
+    """Convert Gemini's deadline output to a valid timestamp string."""
+    if not deadline_str:
+        return None
+
+    # Already a valid datetime string
+    if isinstance(deadline_str, str) and len(deadline_str) > 10:
+        try:
+            datetime.fromisoformat(deadline_str)
+            return deadline_str
+        except ValueError:
+            pass
+
+    # Map day names to actual dates
+    day_map = {
+        "monday":    0, "tuesday": 1, "wednesday": 2,
+        "thursday":  3, "friday":  4, "saturday":  5, "sunday": 6
+    }
+
+    if isinstance(deadline_str, str):
+        lower = deadline_str.lower().strip()
+        today = datetime.now()
+
+        for day_name, day_num in day_map.items():
+            if day_name in lower:
+                days_ahead = (day_num - today.weekday()) % 7
+                if days_ahead == 0:
+                    days_ahead = 7
+                target = today + timedelta(days=days_ahead)
+                return target.strftime("%Y-%m-%d 23:59:00")
+
+        # Try parsing common formats
+        for fmt in ["%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y"]:
+            try:
+                return datetime.strptime(deadline_str, fmt).strftime("%Y-%m-%d 23:59:00")
+            except ValueError:
+                continue
+
+    return None
+
 def save_session(user_id: str, session_data: dict) -> str:
     conn = get_connection()
     try:
@@ -69,6 +109,10 @@ def save_session(user_id: str, session_data: dict) -> str:
 def save_task(user_id: str, task: dict) -> str:
     conn = get_connection()
     try:
+        # Parse deadline safely
+        raw_deadline = task.get("deadline")
+        parsed_deadline = parse_deadline(raw_deadline)
+
         rows = conn.run(
             """
             INSERT INTO tasks
@@ -84,7 +128,7 @@ def save_task(user_id: str, task: dict) -> str:
             plabel=task.get("priority_label", "medium"),
             pscore=float(task.get("priority_score", 0.5)),
             ehours=float(task.get("estimated_hours", 1.0)),
-            dl=task.get("deadline")
+            dl=parsed_deadline
         )
         return str(rows[0][0])
     finally:

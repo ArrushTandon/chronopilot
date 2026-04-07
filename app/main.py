@@ -95,7 +95,7 @@ def status():
     return {
         "service": "ChronoPilot",
         "version": "1.0.0",
-        "model": "gemini-3-flash-preview",
+        "model": "gemini-3.1-flash-lite-preview",
         "database": db,
         "agents": ["planner","priority","scheduler","executor","memory"],
         "status": "operational"

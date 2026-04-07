@@ -162,10 +162,19 @@ Be direct. Lead with actions taken. Max 100 words."""
         "session_id": session_id
     }
 
-
 '''
-    # 6. Generate final natural language reply
-    context = f"""You are the Deadline Survival AI — an autonomous productivity system.
+    # 6. Generate final reply - skip extra Gemini call for fast-path routes
+    if "fast-path" in " ".join(execution_log):
+        task_titles = [t['title'] for t in tasks]
+        schedule_summary = schedule.get('summary', '')
+        reply_text = (
+            f"Done. I've broken your workload into {len(tasks)} tasks, "
+            f"ranked them by urgency, and {schedule_summary.lower()}. "
+            f"Your highest priority is: {task_titles[0] if task_titles else 'the most urgent item'}. "
+            f"Everything is saved and your profile has been updated."
+        )
+    else:
+        context = f"""You are ChronoPilot — an autonomous productivity co-pilot.
 You just completed these actions:
 {chr(10).join(execution_log)}
 
@@ -174,17 +183,7 @@ Schedule: {schedule.get('summary', 'No schedule generated')}
 
 User said: {message}
 
-Write a concise, confident reply summarizing what you did autonomously.
-Be direct. Lead with actions taken. Max 120 words."""
-
-    reply_text = generate_with_retry(context)
-
-    return {
-        "reply": reply_text,
-        "agents_invoked": agents_to_invoke,
-        "tasks_created": tasks,
-        "execution_log": execution_log,
-        "session_id": session_id
-    }
+Write a concise, confident reply summarising what you did. Max 80 words."""
+        reply_text = generate_with_retry(context)
 
 '''
